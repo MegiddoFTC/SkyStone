@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -16,32 +16,25 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaSkyStone;
 //@Disabled
 @Autonomous(name = "JJ")
 public class JackBlueGlowCamera extends LinearOpMode {
-    private ElapsedTime runtime = new ElapsedTime();
     private VuforiaSkyStone vuforiaSkyStone;
+    private ElapsedTime runtime = new ElapsedTime();
     private DcMotor ForRight;
-    private DcMotor ForLeft;
-    private DcMotor BackRight;
-    private DcMotor BackLeft;
-    private DcMotor RightMotor;
-    private DcMotor LeftMotor;
-    private DcMotor LeftE;
-    private DcMotor RightE;
-    private Servo Griper;
-    private Servo Graple;
-    private Servo Servo1;
-    private Servo Servo2;
-    private Servo Oner;
-    static final double COUNTS_PER_MOTOR_REV = 2240;
-    static final double DRIVE_GEAR_REDUCTION = 15;
-    static final double WHEEL_DIAMETER_MM = 75;
-    static final double COUNTS_PER_MM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_MM * 3.1415);
-    static final double DRIVE_SPEED = 0.6;
-    static final double TURN_SPEED = 0.5;
-    boolean targetFound;
-
+        private DcMotor ForLeft;
+        private DcMotor BackRight;
+        private DcMotor BackLeft;
+        private DcMotor RightMotor;
+        private DcMotor LeftMotor;
+        private DcMotor LeftE;
+        private DcMotor RightE;
+        private Servo Griper;
+        private Servo Graple;
+        private Servo Servo1;
+        private Servo Servo2;
+        private Servo Oner1;
+        private Servo Oner2;
+        boolean Sky;
     @Override
     public void runOpMode() {
-
         vuforiaSkyStone = new VuforiaSkyStone();
         telemetry.addData("Status", "Initializing Vuforia. Please wait...");
         telemetry.update();
@@ -61,7 +54,8 @@ public class JackBlueGlowCamera extends LinearOpMode {
         Graple = hardwareMap.get(Servo.class, "Graple");
         Servo1 = hardwareMap.get(Servo.class, "Servo1");
         Servo2 = hardwareMap.get(Servo.class, "Servo2");
-        Oner = hardwareMap.get(Servo.class, "Oner");
+        Oner1 = hardwareMap.get(Servo.class, "Oner1");
+        Oner2=hardwareMap.get(Servo.class,"Oner2");
         Servo1.setDirection(Servo.Direction.REVERSE);
         ForLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         BackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -86,55 +80,32 @@ public class JackBlueGlowCamera extends LinearOpMode {
         BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         RightE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         LeftE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
+        Sky=false;
         telemetry.update();
         waitForStart();
+
         while (opModeIsActive()) {
-            telemetry.update();
-            telemetry.addData("isVis",targetFound);
-            if (isTargetVisible("Stone Target")){
-                targetFound=true;
+            if (isTargetVisible("Stone Target")) {
                 processTarget(vuforiaSkyStone.track("Stone Target"));
-            }else {
-                targetFound=false;
+                Sky=true;
+            } else {
+                telemetry.addData("No Targets Detected", "Targets are not visible.");
+                Sky=false;
+            }
+            telemetry.update();
+            if (opModeIsActive()&& runtime.seconds()<30){
+            EncodersControl(1,500,500,500,500,0,0,0.5);
+                EncodersControl(1,-500,500,-500,500,0,0,0.5);
+
             }
         }
-        EncodersControl(0.4,3000,-3000,-3000,3000,0,0,0.5);
-
         vuforiaSkyStone.deactivate();
         vuforiaSkyStone.close();
-        if(isTargetVisible("Stone Target")){}
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
-    }
+        if(isTargetVisible("Stone Target")){
 
-    private boolean isTargetVisible(String trackableName) {
-        boolean isVisible;
-        VuforiaBase.TrackingResults vuforiaResults = vuforiaSkyStone.track(trackableName);
-        if (vuforiaResults.isVisible) {
-            isVisible = true;
-        } else {
-            isVisible = false;
         }
-        return isVisible;
     }
-    private void initVuforia() {
-        vuforiaSkyStone.initialize(
-                "",
-                VuforiaLocalizer.CameraDirection.BACK,
-                true,
-                true,
-                VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES,
-                0, // dx
-                0, // dy
-                0, // dz
-                0, // xAngle
-                -90, // yAngle
-                0, // zAngle
-                true); // useCompetitionFieldTargetLocations
-    }
-
-    public void EncodersControl (double speed, int leftForMM, int rightForMM,int leftBackMM,int rightBackMM,double rightMotorPower,double leftMotorPower,double ServoPower){
+    public void EncodersControl(double speed, int leftForMM, int rightForMM, int leftBackMM, int rightBackMM, double rightMotorPower, double leftMotorPower, double ServoPower) {
         int newTargetForRight;
         int newTargetForLeft;
         int newTargetBackRight;
@@ -142,14 +113,14 @@ public class JackBlueGlowCamera extends LinearOpMode {
         double newTargetRightMotor;
         double newTargetLeftMotor;
 
-        if (opModeIsActive()){
+        if (opModeIsActive()) {
 
-            newTargetForRight=ForRight.getCurrentPosition()+rightForMM;
-            newTargetForLeft=ForLeft.getCurrentPosition()+leftForMM;
-            newTargetBackRight=BackRight.getCurrentPosition()+rightBackMM;
-            newTargetBackLeft=BackLeft.getCurrentPosition()+leftBackMM;
-            newTargetRightMotor=rightMotorPower;
-            newTargetLeftMotor=leftMotorPower;
+            newTargetForRight = ForRight.getCurrentPosition() + rightForMM;
+            newTargetForLeft = ForLeft.getCurrentPosition() + leftForMM;
+            newTargetBackRight = BackRight.getCurrentPosition() + rightBackMM;
+            newTargetBackLeft = BackLeft.getCurrentPosition() + leftBackMM;
+            newTargetRightMotor = rightMotorPower;
+            newTargetLeftMotor = leftMotorPower;
 
 
             ForRight.setTargetPosition(newTargetForRight);
@@ -158,7 +129,7 @@ public class JackBlueGlowCamera extends LinearOpMode {
             BackLeft.setTargetPosition(newTargetBackLeft);
             RightMotor.setPower(newTargetRightMotor);
             LeftMotor.setPower(newTargetLeftMotor);
-            Oner.setPosition(ServoPower);
+            Oner1.setPosition(ServoPower);
 
             ForRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             ForLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -171,11 +142,11 @@ public class JackBlueGlowCamera extends LinearOpMode {
             BackRight.setPower(Math.abs(speed));
             BackLeft.setPower(Math.abs(speed));
 
-            while ((opModeIsActive() && (ForRight.isBusy() && ForLeft.isBusy() && BackRight.isBusy() && BackLeft.isBusy()) || (opModeIsActive() && targetFound))) {
+            while (opModeIsActive() && (ForRight.isBusy() && ForLeft.isBusy() && BackRight.isBusy() && BackLeft.isBusy())) {
 
                 // Display it for the driver.
-                telemetry.addData("Path1",  "Running to %7d :%7d :%7d :%7d", newTargetForRight,  newTargetForLeft,newTargetBackRight,newTargetBackLeft);
-                telemetry.addData("Path2",  "Running at %7d :%7d :%7d :%7d",
+                telemetry.addData("Path1", "Running to %7d :%7d :%7d :%7d", newTargetForRight, newTargetForLeft, newTargetBackRight, newTargetBackLeft);
+                telemetry.addData("Path2", "Running at %7d :%7d :%7d :%7d",
                         ForRight.getCurrentPosition(),
                         ForLeft.getCurrentPosition(),
                         BackRight.getCurrentPosition(),
@@ -198,8 +169,47 @@ public class JackBlueGlowCamera extends LinearOpMode {
             RightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             LeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
-
     }
+    private void initVuforia() {
+        // Rotate phone -90 so back camera faces "forward" direction on robot.
+        // Assumes landscape orientation
+        vuforiaSkyStone.initialize(
+                "", // vuforiaLicenseKey
+                VuforiaLocalizer.CameraDirection.BACK, // cameraDirection
+                true, // useExtendedTracking
+                true, // enableCameraMonitoring
+                VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES, // cameraMonitorFeedback
+                0, // dx
+                0, // dy
+                0, // dz
+                0, // xAngle
+                -90, // yAngle
+                0, // zAngle
+                true); // useCompetitionFieldTargetLocations
+    }
+
+    /**
+     * Check to see if the target is visible.
+     */
+    private boolean isTargetVisible(String trackableName) {
+        //VuforiaSkyStone vuforiaResult;
+        boolean isVisible;
+        //vuforiaResult;
+        // Get vuforia results for target.
+        VuforiaBase.TrackingResults vuforiaResults = vuforiaSkyStone.track(trackableName);
+        // Is this target visible?
+        if (vuforiaResults.isVisible) {
+            isVisible = true;
+        } else {
+            isVisible = false;
+        }
+        return isVisible;
+    }
+
+    /**
+     * This function displays location on the field and rotation about the Z
+     * axis on the field. It uses results from the isTargetVisible function.
+     */
     private void processTarget(VuforiaBase.TrackingResults vuforiaResults) {
         // Display the target name.
         telemetry.addData("Target Detected", vuforiaResults.name + " is visible.");
@@ -209,6 +219,10 @@ public class JackBlueGlowCamera extends LinearOpMode {
         telemetry.addData("Rotation about Z (deg)", Double.parseDouble(JavaUtil.formatNumber(vuforiaResults.zAngle, 2)));
     }
 
+    /**
+     * By default, distances are returned in millimeters by Vuforia.
+     * Convert to other distance units (CM, M, IN, and FT).
+     */
     private double displayValue(float originalValue, String units) {
         if (units.equals("CM")) return  originalValue / 10;
         else if (units.equals("M")) return originalValue / 1000;

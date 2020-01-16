@@ -6,10 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-
 //@Disabled
-@TeleOp(name = "DriveBack",group = "Iterative Opmode")
-public class DriveBack extends OpMode {
+@TeleOp(name = "DriveM")
+public class DriveMaayan extends OpMode {
     private DcMotor ForRight;
     private DcMotor ForLeft;
     private DcMotor BackRight;
@@ -93,9 +92,9 @@ public class DriveBack extends OpMode {
         }else if (gamepad1.right_trigger>0.2&&i==-1){
             StrafeRight4();
         } else if(i==-1){
-            MecanumBack(-gamepad1.right_stick_y,-gamepad1.right_stick_x,-gamepad1.left_stick_x);
+            MecanumBack(gamepad1.left_stick_y,-gamepad1.left_stick_x,-gamepad1.right_stick_x);
         }else{
-            Mecanums(gamepad1.right_stick_y,-gamepad1.right_stick_x,-gamepad1.left_stick_x);
+            Mecanums(-gamepad1.left_stick_y,gamepad1.left_stick_x,-gamepad1.right_stick_x);
         }
         if (gamepad2.left_bumper){
             In();
@@ -257,4 +256,5 @@ public class DriveBack extends OpMode {
         Griper.setPosition(0);
     }
 }
+
 
