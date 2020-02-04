@@ -30,9 +30,6 @@ public class JackBlueGlowCamera extends LinearOpMode {
         private Servo Graple;
         private Servo Servo1;
         private Servo Servo2;
-        private Servo Oner1;
-        private Servo Oner2;
-        boolean Sky;
     @Override
     public void runOpMode() {
         vuforiaSkyStone = new VuforiaSkyStone();
@@ -54,8 +51,6 @@ public class JackBlueGlowCamera extends LinearOpMode {
         Graple = hardwareMap.get(Servo.class, "Graple");
         Servo1 = hardwareMap.get(Servo.class, "Servo1");
         Servo2 = hardwareMap.get(Servo.class, "Servo2");
-        Oner1 = hardwareMap.get(Servo.class, "Oner1");
-        Oner2=hardwareMap.get(Servo.class,"Oner2");
         Servo1.setDirection(Servo.Direction.REVERSE);
         ForLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         BackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -80,32 +75,25 @@ public class JackBlueGlowCamera extends LinearOpMode {
         BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         RightE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         LeftE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Sky=false;
         telemetry.update();
         waitForStart();
-
         while (opModeIsActive()) {
             if (isTargetVisible("Stone Target")) {
                 processTarget(vuforiaSkyStone.track("Stone Target"));
-                Sky=true;
             } else {
                 telemetry.addData("No Targets Detected", "Targets are not visible.");
-                Sky=false;
             }
-            telemetry.update();
-            if (opModeIsActive()&& runtime.seconds()<30){
-            EncodersControl(1,500,500,500,500,0,0,0.5);
-                EncodersControl(1,-500,500,-500,500,0,0,0.5);
-
-            }
+            vuforiaSkyStone.deactivate();
+            vuforiaSkyStone.close();
+            if(isTargetVisible("Stone Target")){}
+                return;
         }
-        vuforiaSkyStone.deactivate();
-        vuforiaSkyStone.close();
-        if(isTargetVisible("Stone Target")){
 
-        }
+            EncodersControl(0.3,5000,5000,5000,5000,0,0);
+            EncodersControl(0.3,-5000,5000,-5000,5000,0,0);
+
     }
-    public void EncodersControl(double speed, int leftForMM, int rightForMM, int leftBackMM, int rightBackMM, double rightMotorPower, double leftMotorPower, double ServoPower) {
+    public void EncodersControl(double speed, int leftForMM, int rightForMM, int leftBackMM, int rightBackMM, double rightMotorPower, double leftMotorPower) {
         int newTargetForRight;
         int newTargetForLeft;
         int newTargetBackRight;
@@ -122,14 +110,12 @@ public class JackBlueGlowCamera extends LinearOpMode {
             newTargetRightMotor = rightMotorPower;
             newTargetLeftMotor = leftMotorPower;
 
-
             ForRight.setTargetPosition(newTargetForRight);
             ForLeft.setTargetPosition(newTargetForLeft);
             BackRight.setTargetPosition(newTargetBackRight);
             BackLeft.setTargetPosition(newTargetBackLeft);
             RightMotor.setPower(newTargetRightMotor);
             LeftMotor.setPower(newTargetLeftMotor);
-            Oner1.setPosition(ServoPower);
 
             ForRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             ForLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -142,7 +128,7 @@ public class JackBlueGlowCamera extends LinearOpMode {
             BackRight.setPower(Math.abs(speed));
             BackLeft.setPower(Math.abs(speed));
 
-            while (opModeIsActive() && (ForRight.isBusy() && ForLeft.isBusy() && BackRight.isBusy() && BackLeft.isBusy())) {
+            while ((opModeIsActive() && (ForRight.isBusy() && ForLeft.isBusy() && BackRight.isBusy() && BackLeft.isBusy() && RightMotor.isBusy() && LeftMotor.isBusy() && RightE.isBusy() && LeftE.isBusy())) ||(opModeIsActive()&&isTargetVisible("Stone Target")) ) {
 
                 // Display it for the driver.
                 telemetry.addData("Path1", "Running to %7d :%7d :%7d :%7d", newTargetForRight, newTargetForLeft, newTargetBackRight, newTargetBackLeft);
@@ -168,6 +154,7 @@ public class JackBlueGlowCamera extends LinearOpMode {
             BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             RightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             LeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         }
     }
     private void initVuforia() {
