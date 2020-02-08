@@ -23,6 +23,7 @@ public class DriveBack extends OpMode {
     private DcMotor RightMotor;
     private DcMotor LeftMotor;
     private Servo Graple;
+    private Servo Graple2;
     private Servo Griper;
     private Servo Servo1;
     private Servo Servo2;
@@ -45,10 +46,12 @@ public class DriveBack extends OpMode {
         RightE=hardwareMap.get(DcMotor.class,"right");
         CupStone=hardwareMap.get(Servo.class,"CupStone");
         Graple=hardwareMap.get(Servo.class,"Graple");
+        Graple2=hardwareMap.get(Servo.class,"Graple2");
         Griper=hardwareMap.get(Servo.class,"Griper");
         Servo1=hardwareMap.get(Servo.class,"Servo1");
         Servo2=hardwareMap.get(Servo.class,"Servo2");
         LeftE.setDirection(DcMotorSimple.Direction.REVERSE);
+        Graple2.setDirection(Servo.Direction.REVERSE);
         LeftE.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RightE.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ForRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -87,9 +90,9 @@ public class DriveBack extends OpMode {
             StrafeLeft3();
         }else if (gamepad1.right_bumper&&i==-1){
             StrafeRight3();
-        }else if (gamepad1.left_trigger>0.2&&i==-1){
+        }else if (gamepad1.left_trigger>0.1&&i==-1){
             StrafeLeft4();
-        }else if (gamepad1.right_trigger>0.2&&i==-1){
+        }else if (gamepad1.right_trigger>0.1&&i==-1){
             StrafeRight4();
         } else if(i==-1){
             MecanumBack(-gamepad1.right_stick_y,gamepad1.right_stick_x,-gamepad1.left_stick_x);
@@ -111,12 +114,12 @@ public class DriveBack extends OpMode {
             ServoStatic();
         }
         if(gamepad2.y){
-            Griper.setPosition(1);
+            Griper.setPosition(0.2);
         }else if(gamepad2.x){
-            Griper.setPosition(0);
+            Griper.setPosition(0.4);
         }
         if(((RightE.getCurrentPosition()+LeftE.getCurrentPosition())/2 >= EMIN && -gamepad2.right_stick_y<-0.111) || ((RightE.getCurrentPosition()+LeftE.getCurrentPosition())/2 <= EMAX && -gamepad2.right_stick_y>0.01)){
-            LinearFast(-gamepad2.right_stick_y*2);
+            LinearFast(-gamepad2.right_stick_y*2); //just for being sure
         }else{
             RightE.setPower(0);
             LeftE.setPower(0);
@@ -135,6 +138,7 @@ public class DriveBack extends OpMode {
             GrapleIn();
         }else {
             Graple.setPosition(0.5);
+            Graple2.setPosition(0.5);
         }
 
         telemetry.update();
@@ -235,8 +239,14 @@ public class DriveBack extends OpMode {
         RightE.setPower(y);
         LeftE.setPower(y);
     }
-    void GapleOut(){Graple.setPosition(1);}
-    void GrapleIn(){Graple.setPosition(0);}
+    void GapleOut(){
+        Graple.setPosition(0);
+        Graple2.setPosition(0);
+    }
+    void GrapleIn(){
+        Graple.setPosition(1);
+        Graple2.setPosition(1);
+    }
     void GriperFor(){
         Griper.setPosition(1);
     }

@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 //@Disabled
-@Autonomous(name = "JackRedGlow")
-public class JackRedGlow extends LinearOpMode {
+@Autonomous(name = "RedOneStone")
+public class RedOneStone extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor ForRight;
     private DcMotor ForLeft;

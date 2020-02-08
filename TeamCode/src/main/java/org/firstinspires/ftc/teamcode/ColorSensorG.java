@@ -14,17 +14,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.Locale;
 
-@TeleOp(name = "ColorC")
-public class TryColor extends LinearOpMode {
+@TeleOp(name = "ColorSensorG")
+public class ColorSensorG extends LinearOpMode {
 
-        ColorSensor sensorColor;
+        com.qualcomm.robotcore.hardware.ColorSensor sensorColor;
         DistanceSensor sensorDistance;
 
         @Override
         public void runOpMode() {
 
             // get a reference to the color sensor.
-            sensorColor = hardwareMap.get(ColorSensor.class, "Ss");
+            sensorColor = hardwareMap.get(com.qualcomm.robotcore.hardware.ColorSensor.class, "Ss");
 
             // get a reference to the distance sensor that shares the same name.
             sensorDistance = hardwareMap.get(DistanceSensor.class, "Ss");
