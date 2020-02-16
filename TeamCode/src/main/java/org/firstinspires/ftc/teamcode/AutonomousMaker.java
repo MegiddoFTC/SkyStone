@@ -73,7 +73,7 @@ public class AutonomousMaker extends LinearOpMode {
             LeftMotor = hardwareMap.get(DcMotor.class, "LeftMotor");
             LeftE = hardwareMap.get(DcMotor.class, "left");
             RightE = hardwareMap.get(DcMotor.class, "right");
-            CupStone = hardwareMap.get(Servo.class,"CupStone");
+            CupStone = hardwareMap.get(Servo.class,"CapStone");
             Griper = hardwareMap.get(Servo.class, "Griper");
             Graple = hardwareMap.get(Servo.class, "Graple");
             Servo1 = hardwareMap.get(Servo.class, "Servo1");
@@ -101,7 +101,6 @@ public class AutonomousMaker extends LinearOpMode {
             BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             RightE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             LeftE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//            while (!isStopRequested() && imu.isGyroCalibrated())  { sleep(50);idle();}
             BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
             parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
             parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -144,33 +143,90 @@ public class AutonomousMaker extends LinearOpMode {
                 }else  if (gg == 254){
                     gg=254;
                     phoneCam.stopStreaming();
+
                     break;
                 }
             }
-            gyroTurn(0.2,-90);
-//           if (gg==420){
-//               EncodersControl(0.6,1150,1150,1150,1150,1,1,0,0);
-//               EncodersControl(0.3,850,850,850,850,1,1,0,0);
-//               EncodersControl(0.6,-900,-900,-900,-900,1,1,0,0);
-//               EncodersControl(0.3,915,-915,915,-915,1,1,0,0);
-//           }
-//           else if (gg==69){
-//               EncodersControl(0.6,300,300,300,300,0,0,0,0);
-//               EncodersControl(0.6,450,-450,-450,450,0,0,0,0);
-//               EncodersControl(0.6,850,850,850,850,1,1,0,0);
-//               EncodersControl(0.3,800,800,800,800,1,1,0,0);
-//               EncodersControl(0.6,-950,-950,-950,-950,1,1,0,0);
-//               EncodersControl(0.3,915,-915,915,-915,1,1,0,0);
-//           }
-//           else if (gg==254){
-//               EncodersControl(0.6,300,300,300,300,0,0,0,0);
-//               EncodersControl(0.6,900,-900,-900,900,0,0,0,0);
-//               EncodersControl(0.6,850,850,850,850,1,1,0,0);
-//               EncodersControl(0.3,800,800,800,800,1,1,0,0);
-//               EncodersControl(0.6,-950,-950,-950,-950,1,1,0,0);
-//               EncodersControl(0.3,915,-915,915,-915,1,1,0,0);
-//           }
+           if (gg==420){
+               EncodersControl(0.6,1150,1150,1150,1150,1,1,0,0);
+               EncodersControl(0.3,900,900,900,900,1,1,0,0);
+               EncodersControl(0.6,-950,-950,-950,-950,1,1,0,0);
+               EncodersControl(1,915,-915,915,-915,1,1,0,0);
+               gyroTurn(0.2,273);
+               EncodersControl(0.6,-3350,-3350,-3350,-3350,0,0,0,0);
+               EncodersControl(1,915,-915,915,-915,1,1,0,0);
+               gyroTurn(0.2,182);
+               EncodersControl(0.3,-500,-500,-500,-500,0,0,0,0);
+               Servo1.setPosition(0.8);
+               Servo2.setPosition(0.8);
+               gyroHold(0.1,182,2);
+               Servo1.setPosition(0.5);
+               Servo2.setPosition(0.5);
+               EncodersControl(0.8,900,900,900,900,0,0,0,0);
+               Servo1.setPosition(0.6);
+               Servo2.setPosition(0.6);
+               EncodersControl(0.8,-1800,1800,-1800,1800,0,0,0,0);
+               Servo1.setPosition(0.3);
+               Servo2.setPosition(0.3);
+               EncodersControl(1,-1000,-1000,-1000,-1000,0,0,0,0);
+               EncodersControl(0.8,1600,1600,1600,1600,0,0,0,0);
+               EncodersControl(0.8,-400,400,400,-400,0,0,0,0);
+           }
+           else if (gg==69){
+               EncodersControl(0.6,300,300,300,300,0,0,0,0);
+               EncodersControl(0.6,450,-450,-450,450,0,0,0,0);
+               EncodersControl(0.6,850,850,850,850,1,1,0,0);
+               EncodersControl(0.3,900,900,900,900,1,1,0,0);
+               EncodersControl(0.6,-950,-950,-950,-950,1,1,0,0);
+               EncodersControl(1,915,-915,915,-915,1,1,0,0);
+               gyroTurn(0.2,273);
+               EncodersControl(0.6,-3750,-3750,-3750,-3750,0,0,0,0);
+               EncodersControl(1,915,-915,915,-915,1,1,0,0);
+               gyroTurn(0.2,182);
+               EncodersControl(0.3,-500,-500,-500,-500,0,0,0,0);
+               Servo1.setPosition(0.8);
+               Servo2.setPosition(0.8);
+               gyroHold(0.1,182,2);
+               Servo1.setPosition(0.5);
+               Servo2.setPosition(0.5);
+               EncodersControl(0.8,850,850,850,850,0,0,0,0);
+               Servo1.setPosition(0.6);
+               Servo2.setPosition(0.6);
+               EncodersControl(0.8,-1800,1800,-1800,1800,0,0,0,0);
+               Servo1.setPosition(0.3);
+               Servo2.setPosition(0.3);
+               EncodersControl(1,-900,-900,-900,-900,0,0,0,0);
+               EncodersControl(0.8,1600,1600,1600,1600,0,0,0,0);
+               EncodersControl(0.6,-400,400,400,-400,0,0,0,0);
+           }
+           else if (gg==254){
+               EncodersControl(0.6,300,300,300,300,0,0,0,0);
+               EncodersControl(0.6,850,-850,-850,850,0,0,0,0);
+               EncodersControl(0.6,850,850,850,850,1,1,0,0);
+               EncodersControl(0.3,900,900,900,900,1,1,0,0);
+               EncodersControl(0.6,-950,-950,-950,-950,1,1,0,0);
+               EncodersControl(1,915,-915,915,-915,1,1,0,0);
+               gyroTurn(0.2,272.5);
+               EncodersControl(0.6,-4100,-4100,-4100,-4100,0,0,0,0);
+               EncodersControl(1,915,-915,915,-915,0,0,0,0);
+               gyroTurn(0.2,183);
+               EncodersControl(0.3,-500,-500,-500,-500,0,0,0,0);
+               Servo1.setPosition(0.8);
+               Servo2.setPosition(0.8);
+               gyroHold(0.1,182,2);
+               Servo1.setPosition(0.5);
+               Servo2.setPosition(0.5);
+               EncodersControl(0.8,850,850,850,850,0,0,0,0);
+               Servo1.setPosition(0.6);
+               Servo2.setPosition(0.6);
+               EncodersControl(0.8,-1800,1800,-1800,1800,0,0,0,0);
+               Servo1.setPosition(0.3);
+               Servo2.setPosition(0.3);
+               EncodersControl(1,-1000,-1000,-1000,-1000,0,0,0,0);
+               EncodersControl(0.8,1600,1600,1600,1600,0,0,0,0);
+               EncodersControl(0.8,-400,400,400,-400,0,0,0,0);
 
+           }
 
             telemetry.addData("Path", "Complete");
             telemetry.update();
@@ -486,7 +542,7 @@ public class AutonomousMaker extends LinearOpMode {
             Imgproc.rectangle(
                     input,
                     new Point(93, 108),
-                    new Point(97, 132),
+                    new Point(98, 132),
                     new Scalar(255,0,0), 2);
 
             double[] x = input.get(110, 165);

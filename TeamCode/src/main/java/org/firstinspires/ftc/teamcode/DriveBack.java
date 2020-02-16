@@ -28,8 +28,8 @@ public class DriveBack extends OpMode {
     final static double SLOWING = 1.5;
     final static double POWER = 0.3;
     final static double POWER2 = 1;
-    final static double EMAX = 3300;
-    final static double EMIN = 95;
+    final static double EMAX = 3200;
+    final static double EMIN = 140;
     @Override
     public void init() {
         d = 0;
@@ -96,16 +96,16 @@ public class DriveBack extends OpMode {
         }else{
             Mecanums(gamepad1.right_stick_y,-gamepad1.right_stick_x,-gamepad1.left_stick_x);
         }
-        if (gamepad2.left_bumper){
+        if (gamepad2.left_trigger>0.111){
             In();
-        }else if(gamepad2.right_bumper){
+        }else if(gamepad2.right_trigger>0.111){
             Out();
         }else{
             MotorStatic();
         }
-        if(gamepad2.a||gamepad1.b){
+        if(gamepad2.b||gamepad1.b){
             Down();
-        }else if (gamepad2.b||gamepad1.a){
+        }else if (gamepad2.a||gamepad1.a){
             Up();
         }else{
             ServoStatic();
