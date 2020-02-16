@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -16,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import java.util.Locale;
-
+@Disabled
 @TeleOp(name = "FieldSentricDrive")
 public class FieldSentricDrive extends OpMode {
 private DcMotor ForRight;
@@ -65,8 +66,8 @@ double newY;
 
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         telemetry.update();
-       newY = (Math.sqrt(x*x+y*y)*Math.sin(Math.atan(y/x)-angles.secondAngle));
-       newX =(Math.sqrt(x*x+y*y)*Math.cos(Math.atan(y/x)-angles.secondAngle));
+       newY = (Math.sqrt(x*x+y*y)*Math.sin(Math.atan(y/x)-angles.thirdAngle));
+       newX =(Math.sqrt(x*x+y*y)*Math.cos(Math.atan(y/x)-angles.thirdAngle));
 
         Mecanums(newY,newX,sp);
 

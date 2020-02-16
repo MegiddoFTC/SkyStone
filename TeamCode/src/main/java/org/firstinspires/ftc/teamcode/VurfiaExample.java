@@ -8,8 +8,9 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaBase;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaSkyStone;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 
-//@Disabled
+@Disabled
 @TeleOp(name = "vuforia example",group = "Iterative Opmode")
 public class VurfiaExample extends LinearOpMode {
     private VuforiaSkyStone vuforiaSkyStone;
@@ -28,22 +29,30 @@ public class VurfiaExample extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
-
+        /*
         while (opModeIsActive()) {
             // check if there is sky stone
-            if (isTargetVisible("Stone Target")) {
+            if (isTargetVisible("SkyStone3")) {
                 // show everything about target
-                processTarget(vuforiaSkyStone.track("Stone Target"));
+                processTarget(vuforiaSkyStone.track("SkyStone3"));
+//                telemetry.addData("bla", "bla bla");
             } else {
                 telemetry.addData("No Targets Detected", "Targets are not visible.");
             }
             telemetry.update();
+        }*/
+
+        while (opModeIsActive()) {
+            if (isTargetVisible("SyStone2")){
+                telemetry.addData("nla", "bla bla\n");
+            }
         }
+
         vuforiaSkyStone.deactivate();
         vuforiaSkyStone.close();
-        if(isTargetVisible("Stone Target")){
-
-        }
+//        if(isTargetVisible("SkyStone")){
+//
+//        }
     }
 
     /**
@@ -53,7 +62,7 @@ public class VurfiaExample extends LinearOpMode {
         // Rotate phone -90 so back camera faces "forward" direction on robot.
         // Assumes landscape orientation
         vuforiaSkyStone.initialize(
-                "", // vuforiaLicenseKey
+                "AX1u28H/////AAABmVnaN1DibUP2qqhbRQ9upMwecZe4HqbIyDF6mRqT02lkLq4BQ03rzHTBlDcKGxQZz87xMS2I/w30Frof05wrrN6mihivWgIschkjAyZvJOyy+3R3cQVkBZ0Jz4Qc7JjvknA07b5iJVp3AOQWYPqunskYCEQ+OSHZsuiu8Nc0O1pOc1zXeIxaxPiy/jhpX3zPg3SvC8G0fpvZWY9FgOggWa2BpE5rMjFF5orX5OZUHa6pcECIyIh1oBJ9EvntYt4ogBhCiTrSe0oF8ecrT80rRs1ACHz7cRIPz25f5xwYEAxYBznbHwwM17PgfchDVjrJ/vVyiKh6kTJZawZp5Nz2rMXIP1Hznc6SXgrfeQvebOCe", // vuforiaLicenseKey
                 VuforiaLocalizer.CameraDirection.BACK, // cameraDirection
                 true, // useExtendedTracking
                 true, // enableCameraMonitoring

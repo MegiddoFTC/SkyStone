@@ -1,15 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcontroller.external.samples.SensorREVColorDistance;
 
 //@Disabled
 @TeleOp(name = "DriveBack",group = "Iterative Opmode")
@@ -27,15 +22,17 @@ public class DriveBack extends OpMode {
     private Servo Griper;
     private Servo Servo1;
     private Servo Servo2;
-    private Servo CupStone;
+    private Servo CapStone;
     double i;
+    double d;
     final static double SLOWING = 1.5;
     final static double POWER = 0.3;
     final static double POWER2 = 1;
-    final static double EMAX = 3480;
-    final static double EMIN = 90;
+    final static double EMAX = 3300;
+    final static double EMIN = 95;
     @Override
     public void init() {
+        d = 0;
         ForRight = hardwareMap.get(DcMotor.class,"ForRight");
         ForLeft = hardwareMap.get(DcMotor.class,"ForLeft");
         BackRight = hardwareMap.get(DcMotor.class,"BackRight");
@@ -44,7 +41,7 @@ public class DriveBack extends OpMode {
         LeftMotor=hardwareMap.get(DcMotor.class,"LeftMotor");
         LeftE=hardwareMap.get(DcMotor.class,"left");
         RightE=hardwareMap.get(DcMotor.class,"right");
-        CupStone=hardwareMap.get(Servo.class,"CupStone");
+        CapStone =hardwareMap.get(Servo.class,"CapStone");
         Graple=hardwareMap.get(Servo.class,"Graple");
         Graple2=hardwareMap.get(Servo.class,"Graple2");
         Griper=hardwareMap.get(Servo.class,"Griper");
@@ -106,15 +103,15 @@ public class DriveBack extends OpMode {
         }else{
             MotorStatic();
         }
-        if(gamepad2.b||gamepad1.b){
+        if(gamepad2.a||gamepad1.b){
             Down();
-        }else if (gamepad2.a||gamepad1.a){
+        }else if (gamepad2.b||gamepad1.a){
             Up();
         }else{
             ServoStatic();
         }
         if(gamepad2.y){
-            Griper.setPosition(0.2);
+            Griper.setPosition(0.7);
         }else if(gamepad2.x){
             Griper.setPosition(0.4);
         }
@@ -129,9 +126,6 @@ public class DriveBack extends OpMode {
         }else if(gamepad2.dpad_right){
             CupStoneOn();
         }
-        else {
-            CupStone.setPosition(0.5);
-        }
         if (-gamepad2.left_stick_y>0.111){
             GapleOut();
         }else if (-gamepad2.left_stick_y<-0.111){
@@ -140,6 +134,7 @@ public class DriveBack extends OpMode {
             Graple.setPosition(0.5);
             Graple2.setPosition(0.5);
         }
+
 
         telemetry.update();
         telemetry.addData("ER",RightE.getCurrentPosition());
@@ -150,6 +145,8 @@ public class DriveBack extends OpMode {
         telemetry.addData("ForLeft",ForLeft.getCurrentPosition());
         telemetry.addData("BackRight",BackRight.getCurrentPosition());
         telemetry.addData("BackLeft",BackLeft.getCurrentPosition());
+        telemetry.addData("left", Graple.getPosition());
+        telemetry.addData("left", Graple2.getPosition());
     }
     void In(){
         LeftMotor.setPower(-1);
@@ -254,10 +251,10 @@ public class DriveBack extends OpMode {
         Griper.setPosition(0);
     }
     void CupStoneOn(){
-        CupStone.setPosition(1);
+        CapStone.setPosition(1);
     }
     void CupStoneBack(){
-        CupStone.setPosition(0);
+        CapStone.setPosition(0);
     }
 }
 

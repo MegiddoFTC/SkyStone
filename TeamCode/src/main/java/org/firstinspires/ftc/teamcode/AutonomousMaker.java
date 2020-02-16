@@ -1,29 +1,51 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import android.graphics.Color;
 
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaBase;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaSkyStone;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
+import org.openftc.easyopencv.OpenCvPipeline;
 
-@Disabled
+import java.util.Locale;
+
+//@Disabled
 @Autonomous(name = "AutonomousMaker")
 public class AutonomousMaker extends LinearOpMode {
-    private VuforiaSkyStone vuforiaSkyStone;
-    ModernRoboticsI2cGyro gyro    = null;
-    private DcMotor ForRight;
-    private DcMotor ForLeft;
-    private DcMotor BackRight;
-    private DcMotor BackLeft;
+    BNO055IMU imu;
+    Orientation angles;
+    double gg;
+    double numnum;
+    private DcMotorEx ForRight;
+    private DcMotorEx ForLeft;
+    private DcMotorEx BackRight;
+    private DcMotorEx BackLeft;
     private DcMotor RightMotor;
     private DcMotor LeftMotor;
     private DcMotor LeftE;
@@ -33,31 +55,25 @@ public class AutonomousMaker extends LinearOpMode {
     private Servo Servo1;
     private Servo Servo2;
     private Servo CupStone;
+    OpenCvCamera phoneCam;
     static final double COUNTS_PER_MOTOR_REV = 2240;
     static final double WHEEL_DIAMETER_MM = 75;
     static final double DRIVE_GEAR_REDUCTION = 15;
-    static final double     COUNTS_PER_MM         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-                (WHEEL_DIAMETER_MM * 3.1415);
-
-        static final double     DRIVE_SPEED             = 0.7;
-        static final double     TURN_SPEED              = 0.5;
-
-        static final double     HEADING_THRESHOLD       = 1 ;
-        static final double     P_TURN_COEFF            = 0.1;
-        static final double     P_DRIVE_COEFF           = 0.15;
-
+    static final double     HEADING_THRESHOLD       = 1 ;
+    static final double     P_TURN_COEFF            = 0.1;
+    static final double     P_DRIVE_COEFF           = 0.15;
 
         @Override
         public void runOpMode() {
-            CupStone = hardwareMap.get(Servo.class,"CupStone");
-            ForRight = hardwareMap.get(DcMotor.class, "ForRight");
-            ForLeft = hardwareMap.get(DcMotor.class, "ForLeft");
-            BackRight = hardwareMap.get(DcMotor.class, "BackRight");
-            BackLeft = hardwareMap.get(DcMotor.class, "BackLeft");
+            ForRight = (DcMotorEx)hardwareMap.get(DcMotor.class, "ForRight");
+            ForLeft = (DcMotorEx)hardwareMap.get(DcMotor.class, "ForLeft");
+            BackRight = (DcMotorEx)hardwareMap.get(DcMotor.class, "BackRight");
+            BackLeft = (DcMotorEx)hardwareMap.get(DcMotor.class, "BackLeft");
             RightMotor = hardwareMap.get(DcMotor.class, "RightMotor");
             LeftMotor = hardwareMap.get(DcMotor.class, "LeftMotor");
             LeftE = hardwareMap.get(DcMotor.class, "left");
             RightE = hardwareMap.get(DcMotor.class, "right");
+            CupStone = hardwareMap.get(Servo.class,"CupStone");
             Griper = hardwareMap.get(Servo.class, "Griper");
             Graple = hardwareMap.get(Servo.class, "Graple");
             Servo1 = hardwareMap.get(Servo.class, "Servo1");
@@ -66,68 +82,101 @@ public class AutonomousMaker extends LinearOpMode {
             LeftE.setDirection(DcMotorSimple.Direction.REVERSE);
             ForLeft.setDirection(DcMotorSimple.Direction.REVERSE);
             BackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-            LeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            RightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             LeftE.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             RightE.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             ForRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             ForLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             BackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             BackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            telemetry.addData("Status", "Resetting Encoders");
-            telemetry.update();
             ForRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             ForLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             BackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             BackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             RightE.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             LeftE.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
             ForRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             ForLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             BackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             RightE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             LeftE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
-            gyro.calibrate();
-            while (!isStopRequested() && gyro.isCalibrating())  {
-                sleep(50);
-                idle();
-            }
-            telemetry.addData(">", "Robot Ready.");
-            telemetry.update();
-            while (!isStarted()) {
-                telemetry.addData(">", "Robot Heading = %d", gyro.getIntegratedZValue());
-                telemetry.update();
-            }
-            gyro.resetZAxisIntegrator();
-
+//            while (!isStopRequested() && imu.isGyroCalibrated())  { sleep(50);idle();}
+            BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+            parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+            parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+            parameters.calibrationDataFile = "BNO055IMUCalibration.json";
+            parameters.loggingEnabled = true;
+            parameters.loggingTag = "IMU";
+            parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+            imu = hardwareMap.get(BNO055IMU.class, "imu");
+            imu.initialize(parameters);
+            composeTelemetry();
+            int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+            phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+            phoneCam.openCameraDevice();
+            phoneCam.setPipeline(new SamplePipeline());
+            phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
             waitForStart();
+
+            imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
+
             while (opModeIsActive()) {
-                if (isTargetVisible("Stone Target")) {
-                    processTarget(vuforiaSkyStone.track("Stone Target"));
-                } else {
-                    telemetry.addData("No Targets Detected", "Targets are not visible.");
+                telemetry.addData("Runtime", "%.03f", getRuntime());
+                telemetry.update();
+                telemetry.addData("gg value",gg);
+                telemetry.addData("Frame Count", phoneCam.getFrameCount());
+                telemetry.addData("FPS", String.format("%.2f", phoneCam.getFps()));
+                telemetry.addData("Total frame time ms", phoneCam.getTotalFrameTimeMs());
+                telemetry.addData("Pipeline time ms", phoneCam.getPipelineTimeMs());
+                telemetry.addData("Overhead time ms", phoneCam.getOverheadTimeMs());
+                telemetry.addData("Theoretical max FPS", phoneCam.getCurrentPipelineMaxFps());
+                telemetry.update();
+                if (gg == 69){
+                    gg=69;
+                    phoneCam.stopStreaming();
+                    break;
+                } else if (gg == 420){
+                    gg=420;
+                    phoneCam.stopStreaming();
+                    break;
+                }else  if (gg == 254){
+                    gg=254;
+                    phoneCam.stopStreaming();
+                    break;
                 }
             }
-            vuforiaSkyStone.deactivate();
-            vuforiaSkyStone.close();
-            if(isTargetVisible("Stone Target")){}
+            gyroTurn(0.2,-90);
+//           if (gg==420){
+//               EncodersControl(0.6,1150,1150,1150,1150,1,1,0,0);
+//               EncodersControl(0.3,850,850,850,850,1,1,0,0);
+//               EncodersControl(0.6,-900,-900,-900,-900,1,1,0,0);
+//               EncodersControl(0.3,915,-915,915,-915,1,1,0,0);
+//           }
+//           else if (gg==69){
+//               EncodersControl(0.6,300,300,300,300,0,0,0,0);
+//               EncodersControl(0.6,450,-450,-450,450,0,0,0,0);
+//               EncodersControl(0.6,850,850,850,850,1,1,0,0);
+//               EncodersControl(0.3,800,800,800,800,1,1,0,0);
+//               EncodersControl(0.6,-950,-950,-950,-950,1,1,0,0);
+//               EncodersControl(0.3,915,-915,915,-915,1,1,0,0);
+//           }
+//           else if (gg==254){
+//               EncodersControl(0.6,300,300,300,300,0,0,0,0);
+//               EncodersControl(0.6,900,-900,-900,900,0,0,0,0);
+//               EncodersControl(0.6,850,850,850,850,1,1,0,0);
+//               EncodersControl(0.3,800,800,800,800,1,1,0,0);
+//               EncodersControl(0.6,-950,-950,-950,-950,1,1,0,0);
+//               EncodersControl(0.3,915,-915,915,-915,1,1,0,0);
+//           }
 
-            gyroDrive(DRIVE_SPEED, 48.0, 0.0);
-            gyroTurn( TURN_SPEED, -45.0);
-            gyroHold( TURN_SPEED, -45.0, 0.5);
-            gyroDrive(DRIVE_SPEED, 12.0, -45.0);
-            gyroTurn( TURN_SPEED,  45.0);
-            gyroHold( TURN_SPEED,  45.0, 0.5);
-            gyroTurn( TURN_SPEED,   0.0);
-            gyroHold( TURN_SPEED,   0.0, 1.0);
-            gyroDrive(DRIVE_SPEED,-48.0, 0.0);
 
             telemetry.addData("Path", "Complete");
             telemetry.update();
         }
-    public void EncodersControl(double speed, int leftForMM, int rightForMM, int leftBackMM, int rightBackMM, double rightMotorPower, double leftMotorPower,int RightEMM,int LeftEMM) {
+
+     public void EncodersControl(double speed, int leftForMM, int rightForMM, int leftBackMM, int rightBackMM, double rightMotorPower, double leftMotorPower,int RightEMM,int LeftEMM) {
         int newTargetForRight;
         int newTargetForLeft;
         int newTargetBackRight;
@@ -196,39 +245,41 @@ public class AutonomousMaker extends LinearOpMode {
             ForLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             BackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             BackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            RightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            LeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
             RightE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             LeftE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
-        public void gyroDrive ( double speed, double distance, double angle) {
+        public void gyroDrive ( double speed,double Espeed, int distance, double angle,int EMotors,double ShlomMotor){
             int newTargetForRight;
             int newTargetForLeft;
             int newTargetBackRight;
             int newTargetBackLeft;
-            int newTargetRightE;
-            int newTargetLeftE;
-            double newTargetRightMotor;
-            double newTargetLeftMotor;
-            int     moveCounts;
-            double  max;
-            double  error;
-            double  steer;
-            double  leftSpeed;
-            double  rightSpeed;
+            int moveCounts;
+            int Right;
+            int Left;
+            double max;
+            double error;
+            double steer;
+            double leftSpeed;
+            double rightSpeed;
 
             if (opModeIsActive()) {
-
-                moveCounts = (int)(distance * COUNTS_PER_MM);
+                moveCounts = distance;
                 newTargetBackLeft=BackLeft.getCurrentPosition() +  moveCounts;
                 newTargetBackRight=BackRight.getCurrentPosition() + moveCounts;
                 newTargetForLeft=ForLeft.getCurrentPosition() + moveCounts;
                 newTargetForRight=ForRight.getCurrentPosition() + moveCounts;
+                Right=RightE.getTargetPosition()+EMotors;
+                Left=LeftE.getTargetPosition()+EMotors;
                 ForRight.setTargetPosition(newTargetForRight);
                 ForLeft.setTargetPosition(newTargetForLeft);
                 BackRight.setTargetPosition(newTargetBackRight);
                 BackLeft.setTargetPosition(newTargetBackLeft);
+                RightE.setTargetPosition(Right);
+                LeftE.setTargetPosition(Left);
+                RightE.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                LeftE.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 ForRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 ForLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 BackLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -239,6 +290,10 @@ public class AutonomousMaker extends LinearOpMode {
                 ForLeft.setPower(speed);
                 BackRight.setPower(speed);
                 BackLeft.setPower(speed);
+                RightE.setPower(Espeed);
+                LeftE.setPower(Espeed);
+                RightMotor.setPower(ShlomMotor);
+                LeftMotor.setPower(ShlomMotor);
 
                 while (opModeIsActive() && (ForRight.isBusy() && ForLeft.isBusy() && BackRight.isBusy() && BackLeft.isBusy())) {
 
@@ -306,9 +361,7 @@ public class AutonomousMaker extends LinearOpMode {
         }
 
         public void gyroHold( double speed, double angle, double holdTime) {
-
             ElapsedTime holdTimer = new ElapsedTime();
-
             holdTimer.reset();
             while (opModeIsActive() && (holdTimer.time() < holdTime)) {
                 onHeading(speed, angle, P_TURN_COEFF);
@@ -326,9 +379,9 @@ public class AutonomousMaker extends LinearOpMode {
         }
 
         boolean onHeading(double speed, double angle, double PCoeff) {
-            double   error ;
-            double   steer ;
-            boolean  onTarget = false ;
+            double error;
+            double steer;
+            boolean onTarget = false;
             double leftSpeed;
             double rightSpeed;
 
@@ -339,22 +392,18 @@ public class AutonomousMaker extends LinearOpMode {
                 leftSpeed  = 0.0;
                 rightSpeed = 0.0;
                 onTarget = true;
-            }
-            else {
+            }else {
                 steer = getSteer(error, PCoeff);
                 rightSpeed  = speed * steer;
                 leftSpeed   = -rightSpeed;
             }
-
             ForLeft.setPower(leftSpeed);
             ForRight.setPower(rightSpeed);
             BackLeft.setPower(leftSpeed);
             BackRight.setPower(rightSpeed);
-
             telemetry.addData("Target", "%5.2f", angle);
             telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
             telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
-
             return onTarget;
         }
 
@@ -363,7 +412,7 @@ public class AutonomousMaker extends LinearOpMode {
 
             double robotError;
 
-            robotError = targetAngle - gyro.getIntegratedZValue();
+            robotError = targetAngle - angles.firstAngle;
             while (robotError > 180)  robotError -= 360;
             while (robotError <= -180) robotError += 360;
             return robotError;
@@ -374,50 +423,98 @@ public class AutonomousMaker extends LinearOpMode {
             return Range.clip(error * PCoeff, -1, 1);
         }
 
-    private void initVuforia() {
-        vuforiaSkyStone.initialize(
-                "",
-                VuforiaLocalizer.CameraDirection.BACK,
-                true,
-                true,
-                VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES,
-                0, // dx
-                0, // dy
-                0, // dz
-                0, // xAngle
-                -90, // yAngle
-                0, // zAngle
-                true); // useCompetitionFieldTargetLocations
+    void composeTelemetry() {
+
+        telemetry.addAction(new Runnable() {
+            @Override
+            public void run() {
+                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            }
+        });
+        telemetry.addLine()
+                .addData("status", new Func<String>() {
+                    @Override
+                    public String value() {
+                        return imu.getSystemStatus().toShortString();
+                    }
+                })
+                .addData("calib", new Func<String>() {
+                    @Override
+                    public String value() {
+                        return imu.getCalibrationStatus().toString();
+                    }
+                });
+
+        telemetry.addLine()
+                .addData("heading", new Func<String>() {
+                    @Override
+                    public String value() {
+                        return formatAngle(angles.angleUnit, angles.firstAngle);
+                    }
+                })
+                .addData("roll", new Func<String>() {
+                    @Override
+                    public String value() {
+                        return formatAngle(angles.angleUnit, angles.secondAngle);
+                    }
+                })
+                .addData("pitch", new Func<String>() {
+                    @Override
+                    public String value() {
+                        return formatAngle(angles.angleUnit, angles.thirdAngle);
+                    }
+                });
     }
 
+    String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
 
-    private boolean isTargetVisible(String trackableName) {
-        boolean isVisible;
-        VuforiaBase.TrackingResults vuforiaResults = vuforiaSkyStone.track(trackableName);
-        if (vuforiaResults.isVisible) {
-            isVisible = true;
-        } else {
-            isVisible = false;
+    String formatDegrees(double degrees){
+        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+
+    class SamplePipeline extends OpenCvPipeline {
+        @Override
+        public Mat processFrame(Mat input) {
+            Imgproc.rectangle(
+                    input,
+                    new Point(163, 108),
+                    new Point(167, 132),
+                    new Scalar(255,140,0), 2);
+
+            Imgproc.rectangle(
+                    input,
+                    new Point(93, 108),
+                    new Point(97, 132),
+                    new Scalar(255,0,0), 2);
+
+            double[] x = input.get(110, 165);
+            double[] x2 = input.get(115,165);
+            double[] x3 = input.get(120,165);
+            double[] x4 = input.get(125,165);
+            double[] x5 = input.get(130,165);
+
+            double[] y = input.get(110,95);
+            double[] y2 = input.get(115,95);
+            double[] y3 = input.get(120,95);
+            double[] y4 = input.get(125,95);
+            double[] y5 = input.get(130,95);
+
+            if ((y[0]+y[1]+y[2])<30||(y2[0]+y2[1]+y2[2])<30||(y3[0]+y3[1]+y3[2])<30||(y4[0]+y4[1]+y4[2])<30||(y5[0]+y5[1]+y5[2])<30){
+                gg=69;
+            }else if((x[0]+x[1]+x[2])<60||(x2[0]+x2[1]+x2[2])<60||(x3[0]+x3[1]+x3[2])<60||(x4[0]+x4[1]+x4[2])<60||(x5[0]+x5[1]+x5[2])<60){
+                gg=420;
+            }else {
+                gg=254;
+            }
+            telemetry.addData("ClrY", y[0] + " " + y[1] + " " + y[2]);
+            telemetry.addData("ClrX", x[0] + " " + x[1] + " " + x[2]);
+            telemetry.addData("gg",gg);
+            telemetry.update();
+            return input;
         }
-        return isVisible;
-    }
-
-
-    private void processTarget(VuforiaBase.TrackingResults vuforiaResults) {
-        telemetry.addData("Target Detected", vuforiaResults.name + " is visible.");
-        telemetry.addData("X (mm)", Double.parseDouble(JavaUtil.formatNumber(displayValue(vuforiaResults.x, "MM"), 2)));
-        telemetry.addData("Y (mm)", Double.parseDouble(JavaUtil.formatNumber(displayValue(vuforiaResults.y, "MM"), 2)));
-        telemetry.addData("Z (mm)", Double.parseDouble(JavaUtil.formatNumber(displayValue(vuforiaResults.z, "MM"), 2)));
-        telemetry.addData("Rotation about Z (deg)", Double.parseDouble(JavaUtil.formatNumber(vuforiaResults.zAngle, 2)));
-    }
-
-    private double displayValue(float originalValue, String units) {
-        if (units.equals("CM")) return  originalValue / 10;
-        else if (units.equals("M")) return originalValue / 1000;
-        else if (units.equals("IN")) return originalValue / 25.4;
-        else if (units.equals("FT")) return (originalValue / 25.4) / 12;
-        else return originalValue;
-    }
+     }
 }
 
 

@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-//@Disabled
+@Disabled
 @Autonomous(name = "RedOneStone")
 public class RedOneStone extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();

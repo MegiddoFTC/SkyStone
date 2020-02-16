@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.Locale;
-
+@Disabled
 @TeleOp(name = "ColorSensorG")
 public class ColorSensorG extends LinearOpMode {
 
